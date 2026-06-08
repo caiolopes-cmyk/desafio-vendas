@@ -1,0 +1,1256 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🏆 Desafio de Vendas — Painel Corporativo</title>
+  <style>
+    /* =============================================
+       RESET & VARIÁVEIS GLOBAIS
+    ============================================= */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg-main:      #07090e;
+      --bg-card:      #0d1017;
+      --bg-card-2:    #131720;
+      --bg-card-3:    #181d28;
+      --border:       #1a1f2e;
+      --border-light: #222840;
+      --gold:         #f4b942;
+      --gold-glow:    #f4b94230;
+      --silver:       #94a3b8;
+      --bronze:       #cd7f32;
+      --green:        #00d48a;
+      --green-dim:    #00d48a20;
+      --red:          #ff4d6d;
+      --accent:       #3b82f6;
+      --text-primary: #dde5f5;
+      --text-sec:     #60708f;
+      --text-dim:     #2d3650;
+
+      /* Cores das equipes */
+      --t1: #8b5cf6;   /* Violeta */
+      --t2: #06b6d4;   /* Ciano */
+      --t3: #f97316;   /* Laranja */
+    }
+
+    html { font-size: 16px; scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg-main);
+      color: var(--text-primary);
+      font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Textura de fundo sutil */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(ellipse 80% 50% at 50% -10%, #1e295040 0%, transparent 70%),
+        radial-gradient(ellipse 40% 30% at 80% 90%, #0f1a2a30 0%, transparent 60%);
+      z-index: 0;
+    }
+
+    /* =============================================
+       LAYOUT WRAPPER
+    ============================================= */
+    .wrapper {
+      max-width: 1300px;
+      margin: 0 auto;
+      padding: 28px 20px 60px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* =============================================
+       HEADER
+    ============================================= */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 32px;
+      padding-bottom: 22px;
+      border-bottom: 1px solid var(--border);
+      gap: 16px;
+    }
+
+    .header-brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .header-trophy {
+      width: 44px; height: 44px;
+      background: linear-gradient(135deg, var(--gold-glow), #f4b94215);
+      border: 1px solid #f4b94244;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      flex-shrink: 0;
+    }
+
+    .header-title h1 {
+      font-size: 1.35rem;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      line-height: 1;
+      color: var(--text-primary);
+    }
+
+    .header-title h1 em {
+      font-style: normal;
+      color: var(--gold);
+    }
+
+    .header-title .subtitle {
+      margin-top: 4px;
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-sec);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .live-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: var(--green-dim);
+      border: 1px solid #00d48a44;
+      border-radius: 20px;
+      padding: 2px 8px;
+      font-size: 0.63rem;
+      font-weight: 700;
+      color: var(--green);
+      letter-spacing: 0.1em;
+    }
+
+    .live-dot {
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: var(--green);
+      animation: blink 1.8s ease-in-out infinite;
+    }
+
+    .header-actions { display: flex; gap: 8px; flex-shrink: 0; }
+
+    /* =============================================
+       BOTÕES
+    ============================================= */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 9px 16px;
+      border-radius: 9px;
+      border: 1px solid var(--border-light);
+      background: var(--bg-card-2);
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      letter-spacing: 0.03em;
+      white-space: nowrap;
+    }
+    .btn:hover   { background: var(--border-light); }
+    .btn-danger  { }
+    .btn-danger:hover  { background: #ff4d6d18; border-color: var(--red); color: var(--red); }
+    .btn-export  { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .btn-export:hover  { background: #2563eb; border-color: #2563eb; }
+
+    /* =============================================
+       SEÇÃO — Header genérico
+    ============================================= */
+    .sec-head {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .sec-head h2 {
+      font-size: 0.67rem;
+      font-weight: 700;
+      color: var(--text-sec);
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .sec-head::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* =============================================
+       KPI CARDS
+    ============================================= */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+
+    .kpi-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 13px;
+      padding: 18px 18px 16px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.25s;
+    }
+
+    /* Linha colorida no topo do card */
+    .kpi-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 16px; right: 16px;
+      height: 2px;
+      border-radius: 0 0 2px 2px;
+      background: var(--c);
+      opacity: 0.55;
+    }
+
+    /* Ícone decorativo fundo */
+    .kpi-ico {
+      position: absolute;
+      right: 14px; top: 12px;
+      font-size: 1.5rem;
+      opacity: 0.09;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    .kpi-label {
+      font-size: 0.64rem;
+      font-weight: 700;
+      color: var(--text-sec);
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+      margin-bottom: 9px;
+    }
+
+    .kpi-value {
+      font-size: 1.25rem;
+      font-weight: 900;
+      letter-spacing: -0.025em;
+      color: var(--c);
+      line-height: 1;
+      transition: color 0.3s;
+    }
+
+    .kpi-sub {
+      margin-top: 5px;
+      font-size: 0.7rem;
+      color: var(--text-sec);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* =============================================
+       PÓDIO
+    ============================================= */
+    .podium-section { margin-bottom: 28px; }
+
+    .podium-wrap {
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 10px;
+      height: 200px;
+      padding: 0 48px;
+    }
+
+    .podium-item {
+      flex: 1;
+      max-width: 240px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .podium-meta {
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    .podium-medal  { font-size: 2rem; line-height: 1; margin-bottom: 5px; }
+    .podium-name   { font-size: 0.9rem; font-weight: 800; color: var(--text-primary); }
+    .podium-val    { font-size: 0.75rem; font-weight: 600; color: var(--text-sec); margin-top: 3px; }
+
+    .podium-block {
+      width: 100%;
+      border-radius: 10px 10px 0 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      font-weight: 900;
+      transition: height 0.7s cubic-bezier(0.34, 1.5, 0.64, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Brilho interno do pódio */
+    .podium-block::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 40%;
+      background: linear-gradient(to bottom, rgba(255,255,255,0.07), transparent);
+      border-radius: inherit;
+    }
+
+    .podium-item.p2nd .podium-block { background: linear-gradient(180deg, #b0b8cc22, #b0b8cc44); border: 1px solid #b0b8cc44; color: var(--silver); }
+    .podium-item.p1st .podium-block { background: linear-gradient(180deg, #f4b94228, #f4b94250); border: 1px solid #f4b94255; color: var(--gold); }
+    .podium-item.p3rd .podium-block { background: linear-gradient(180deg, #cd7f3222, #cd7f3244); border: 1px solid #cd7f3244; color: var(--bronze); }
+
+    /* =============================================
+       TEAM CARDS
+    ============================================= */
+    .teams-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .team-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      transition: border-color 0.3s, box-shadow 0.3s, transform 0.2s;
+    }
+    .team-card:hover { transform: translateY(-2px); }
+    .team-card.r1    { border-color: var(--gold);   box-shadow: 0 0 24px var(--gold-glow); }
+    .team-card.r2    { border-color: #94a3b855; }
+    .team-card.r3    { border-color: #cd7f3244; }
+
+    .team-head {
+      padding: 13px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .team-name-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .tc-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    /* Inputs de nome editáveis — sem visual de input */
+    .name-inp {
+      background: transparent;
+      border: none;
+      outline: none;
+      font-family: inherit;
+      color: var(--text-primary);
+      font-size: 0.88rem;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 5px;
+      transition: background 0.15s;
+      min-width: 0;
+      width: 100%;
+      cursor: text;
+    }
+    .name-inp:hover, .name-inp:focus { background: var(--border); }
+
+    .rank-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 9px;
+      border-radius: 20px;
+      background: var(--bg-card-3);
+      font-size: 0.7rem;
+      font-weight: 700;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .team-totals {
+      padding: 14px 16px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .team-tot-label {
+      font-size: 0.62rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-sec);
+      margin-bottom: 4px;
+    }
+
+    .team-tot-val {
+      font-size: 1.65rem;
+      font-weight: 900;
+      letter-spacing: -0.035em;
+      line-height: 1.1;
+      transition: color 0.3s;
+    }
+
+    .team-diff {
+      margin-top: 3px;
+      font-size: 0.7rem;
+      color: var(--text-sec);
+    }
+    .team-diff.leader { color: var(--green); }
+
+    /* Membros */
+    .members { padding: 12px 16px 14px; }
+
+    .member-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 0;
+    }
+    .member-row + .member-row { border-top: 1px solid var(--border); }
+
+    .member-left { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+
+    .member-name-inp {
+      background: transparent;
+      border: none;
+      outline: none;
+      font-family: inherit;
+      color: var(--text-primary);
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: 5px;
+      transition: background 0.15s;
+      width: 100%;
+    }
+    .member-name-inp:hover, .member-name-inp:focus { background: var(--border); }
+
+    .contrib-row {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .contrib-track {
+      flex: 1;
+      height: 3px;
+      background: var(--border);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .contrib-fill {
+      height: 100%;
+      border-radius: 2px;
+      transition: width 0.5s ease;
+    }
+
+    .contrib-pct {
+      font-size: 0.63rem;
+      font-weight: 700;
+      color: var(--text-sec);
+      min-width: 34px;
+      text-align: right;
+    }
+
+    /* Input de vendas */
+    .sales-inp {
+      background: var(--bg-card-3);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 0.82rem;
+      font-weight: 700;
+      padding: 7px 10px;
+      width: 136px;
+      text-align: right;
+      outline: none;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .sales-inp:focus {
+      background: var(--bg-card-2);
+    }
+    .sales-inp::placeholder { color: var(--text-dim); font-weight: 400; }
+
+    /* =============================================
+       GRÁFICO DE BARRAS
+    ============================================= */
+    .chart-section { margin-bottom: 28px; }
+
+    .chart-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 22px 26px;
+    }
+
+    .chart-bars { display: flex; flex-direction: column; gap: 16px; }
+
+    .bar-row {
+      display: grid;
+      grid-template-columns: 160px 1fr 120px;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .bar-label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      text-align: right;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .bar-track {
+      height: 30px;
+      background: var(--bg-card-3);
+      border-radius: 7px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 7px;
+      transition: width 0.65s cubic-bezier(0.34, 1.4, 0.64, 1);
+      min-width: 4px;
+      position: relative;
+      overflow: hidden;
+    }
+    /* Reflexo no topo da barra */
+    .bar-fill::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 40%;
+      background: linear-gradient(to bottom, rgba(255,255,255,0.12), transparent);
+    }
+
+    .bar-val {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--text-sec);
+      white-space: nowrap;
+    }
+
+    /* =============================================
+       MODAL DE CONFIRMAÇÃO
+    ============================================= */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(4, 5, 10, 0.8);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 900;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+
+    .modal {
+      background: var(--bg-card-2);
+      border: 1px solid var(--border-light);
+      border-radius: 18px;
+      padding: 32px 36px;
+      max-width: 380px;
+      width: 90%;
+      text-align: center;
+      transform: scale(0.95);
+      transition: transform 0.25s cubic-bezier(0.34, 1.5, 0.64, 1);
+    }
+    .modal-overlay.open .modal { transform: scale(1); }
+
+    .modal-icon { font-size: 2.2rem; margin-bottom: 12px; }
+    .modal h3   { font-size: 1.1rem; font-weight: 800; margin-bottom: 8px; }
+    .modal p    { font-size: 0.82rem; color: var(--text-sec); line-height: 1.6; margin-bottom: 22px; }
+
+    .modal-btns {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+    }
+
+    /* =============================================
+       TOAST
+    ============================================= */
+    .toast {
+      position: fixed;
+      bottom: 28px;
+      right: 24px;
+      background: var(--bg-card-2);
+      border: 1px solid var(--border-light);
+      border-radius: 11px;
+      padding: 12px 18px;
+      font-size: 0.83rem;
+      font-weight: 600;
+      z-index: 1000;
+      transform: translateY(90px);
+      opacity: 0;
+      transition: all 0.35s cubic-bezier(0.34, 1.5, 0.64, 1);
+      pointer-events: none;
+      max-width: 340px;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+
+    /* =============================================
+       ANIMAÇÕES
+    ============================================= */
+    @keyframes blink   { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+    @keyframes fadeUp  { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes flash   { 0% { opacity: 0.4; } 50% { opacity: 1; } 100% { opacity: 0.4; } }
+
+    .fade-up { animation: fadeUp 0.45s ease both; }
+
+    /* Staggered delays */
+    .d1 { animation-delay: 0.05s; }
+    .d2 { animation-delay: 0.12s; }
+    .d3 { animation-delay: 0.19s; }
+    .d4 { animation-delay: 0.26s; }
+    .d5 { animation-delay: 0.33s; }
+
+    /* =============================================
+       RESPONSIVO
+    ============================================= */
+    @media (max-width: 960px) {
+      .kpi-grid   { grid-template-columns: repeat(2, 1fr); }
+      .teams-grid { grid-template-columns: 1fr; }
+      .bar-row    { grid-template-columns: 120px 1fr 100px; }
+    }
+
+    @media (max-width: 540px) {
+      .header      { flex-wrap: wrap; }
+      .podium-wrap { padding: 0; }
+      .sales-inp   { width: 110px; font-size: 0.76rem; }
+      .bar-row     { grid-template-columns: 100px 1fr 88px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════
+     WRAPPER
+═══════════════════════════════════════════ -->
+<div class="wrapper">
+
+  <!-- ─── HEADER ─── -->
+  <header class="header fade-up">
+    <div class="header-brand">
+      <div class="header-trophy">🏆</div>
+      <div class="header-title">
+        <h1>DESAFIO DE <em>VENDAS</em></h1>
+        <div class="subtitle">
+          <span class="live-badge"><span class="live-dot"></span>AO VIVO</span>
+          Atualização automática · todos os cálculos no navegador
+        </div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-danger" onclick="confirmReset()" title="Zerar todos os valores">
+        🗑 Zerar Desafio
+      </button>
+      <button class="btn btn-export" onclick="exportResult()" title="Copiar resultado para a área de transferência">
+        📋 Exportar Resultado
+      </button>
+    </div>
+  </header>
+
+  <!-- ─── KPI CARDS ─── -->
+  <section class="kpi-grid fade-up d1" id="kpi-grid">
+    <!-- Gerados pelo JS -->
+  </section>
+
+  <!-- ─── PÓDIO ─── -->
+  <section class="podium-section fade-up d2">
+    <div class="sec-head"><h2>🏅 Pódio — Classificação das Duplas</h2></div>
+    <div class="podium-wrap" id="podium">
+      <!-- Gerado pelo JS -->
+    </div>
+  </section>
+
+  <!-- ─── DUPLAS ─── -->
+  <section class="fade-up d3">
+    <div class="sec-head"><h2>👥 Duplas — Entrada de Dados</h2></div>
+    <div class="teams-grid" id="teams-grid">
+      <!-- Gerado pelo JS -->
+    </div>
+  </section>
+
+  <!-- ─── GRÁFICO ─── -->
+  <section class="chart-section fade-up d4">
+    <div class="sec-head"><h2>📊 Ranking Visual — Comparativo de Duplas</h2></div>
+    <div class="chart-box">
+      <div class="chart-bars" id="chart-bars">
+        <!-- Gerado pelo JS -->
+      </div>
+    </div>
+  </section>
+
+</div><!-- /wrapper -->
+
+<!-- ═══════════════════════════════════════════
+     MODAL DE CONFIRMAÇÃO
+═══════════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-overlay" onclick="handleOverlayClick(event)">
+  <div class="modal">
+    <div class="modal-icon">⚠️</div>
+    <h3>Zerar o Desafio?</h3>
+    <p>Todos os valores de vendas serão redefinidos para <strong>R$ 0,00</strong>.<br>
+    Os nomes dos participantes serão preservados.<br>
+    Esta ação não pode ser desfeita.</p>
+    <div class="modal-btns">
+      <button class="btn" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-danger" onclick="doReset()">✓ Confirmar Reset</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     TOAST
+═══════════════════════════════════════════ -->
+<div class="toast" id="toast" aria-live="polite"></div>
+
+
+<!-- ═══════════════════════════════════════════
+     JAVASCRIPT — lógica completa do painel
+═══════════════════════════════════════════ -->
+<script>
+/* =============================================
+   ESTADO GLOBAL
+   Estrutura de dados do desafio.
+   Todas as alterações passam por `updateState()`.
+============================================= */
+const STORAGE_KEY = 'desafio_vendas_v2';
+const TEAM_COLORS = ['var(--t1)', 'var(--t2)', 'var(--t3)'];
+const TEAM_HEX    = ['#8b5cf6',   '#06b6d4',   '#f97316'  ];  // para CSS inline
+
+let state = {
+  teams: [
+    {
+      id: 1,
+      name: 'Dupla 1',
+      members: [
+        { id: 'A', name: 'Participante A', sales: 0 },
+        { id: 'B', name: 'Participante B', sales: 0 }
+      ]
+    },
+    {
+      id: 2,
+      name: 'Dupla 2',
+      members: [
+        { id: 'C', name: 'Participante C', sales: 0 },
+        { id: 'D', name: 'Participante D', sales: 0 }
+      ]
+    },
+    {
+      id: 3,
+      name: 'Dupla 3',
+      members: [
+        { id: 'E', name: 'Participante E', sales: 0 },
+        { id: 'F', name: 'Participante F', sales: 0 }
+      ]
+    }
+  ]
+};
+
+/* =============================================
+   PERSISTÊNCIA — localStorage
+============================================= */
+function saveState() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (_) {}
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      // Mesclagem segura: preserva estrutura padrão, aplica dados salvos
+      parsed.teams.forEach((savedTeam, i) => {
+        if (state.teams[i]) {
+          state.teams[i].name = savedTeam.name || state.teams[i].name;
+          savedTeam.members.forEach((sm, j) => {
+            if (state.teams[i].members[j]) {
+              state.teams[i].members[j].name  = sm.name  || state.teams[i].members[j].name;
+              state.teams[i].members[j].sales = Number(sm.sales) || 0;
+            }
+          });
+        }
+      });
+    }
+  } catch (_) { /* usa estado padrão */ }
+}
+
+/* =============================================
+   FORMATAÇÃO MONETÁRIA (pt-BR)
+============================================= */
+const fmt = new Intl.NumberFormat('pt-BR', {
+  style: 'currency',
+  currency: 'BRL',
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2
+});
+
+function formatBRL(v) {
+  return fmt.format(v || 0);
+}
+
+/**
+ * Converte string digitada para número.
+ * Aceita: "50000", "50.000,00", "R$ 50.000,00", "50000,50"
+ */
+function parseBRL(str) {
+  if (!str && str !== 0) return 0;
+  const s = String(str)
+    .replace(/R\$\s?/g, '')
+    .replace(/\s/g, '')
+    .replace(/\./g, '')   // remove separadores de milhar
+    .replace(',', '.');   // vírgula → ponto decimal
+  const v = parseFloat(s);
+  return isNaN(v) ? 0 : Math.max(0, v);
+}
+
+/* =============================================
+   CÁLCULOS DERIVADOS
+============================================= */
+/** Total de vendas de uma dupla */
+function teamTotal(team) {
+  return team.members.reduce((s, m) => s + (m.sales || 0), 0);
+}
+
+/** Total geral do desafio */
+function grandTotal() {
+  return state.teams.reduce((s, t) => s + teamTotal(t), 0);
+}
+
+/**
+ * Retorna lista de duplas com total e rank,
+ * ordenada do maior para o menor total.
+ */
+function rankedTeams() {
+  return state.teams
+    .map((t, i) => ({ ...t, total: teamTotal(t), colorIdx: i }))
+    .sort((a, b) => b.total - a.total);
+}
+
+/** Melhor vendedor individual */
+function topSeller() {
+  let best = null;
+  state.teams.forEach(t => {
+    t.members.forEach(m => {
+      if (!best || m.sales > best.sales) {
+        best = { ...m, teamName: t.name };
+      }
+    });
+  });
+  return best;
+}
+
+/* =============================================
+   RENDER — KPI CARDS
+============================================= */
+function renderKPIs() {
+  const ranked = rankedTeams();
+  const total  = grandTotal();
+  const avg    = total / 3;
+  const ts     = topSeller();
+  const leader = ranked[0];
+
+  const cards = [
+    {
+      ico: '👑',
+      label: 'Equipe Líder',
+      val: leader && leader.total > 0 ? leader.name : '—',
+      sub: leader && leader.total > 0 ? formatBRL(leader.total) : 'Aguardando dados…',
+      color: '#f4b942'
+    },
+    {
+      ico: '⚡',
+      label: 'Melhor Vendedor',
+      val: ts && ts.sales > 0 ? ts.name : '—',
+      sub: ts && ts.sales > 0 ? `${formatBRL(ts.sales)} · ${ts.teamName}` : 'Aguardando dados…',
+      color: '#00d48a'
+    },
+    {
+      ico: '💰',
+      label: 'Total do Desafio',
+      val: formatBRL(total),
+      sub: 'Soma de todas as duplas',
+      color: '#a78bfa'
+    },
+    {
+      ico: '📈',
+      label: 'Média por Dupla',
+      val: formatBRL(avg),
+      sub: 'Base: 3 duplas ativas',
+      color: '#94a3b8'
+    }
+  ];
+
+  document.getElementById('kpi-grid').innerHTML = cards.map(c => `
+    <div class="kpi-card" style="--c:${c.color}">
+      <div class="kpi-ico">${c.ico}</div>
+      <div class="kpi-label">${c.label}</div>
+      <div class="kpi-value">${escHtml(c.val)}</div>
+      <div class="kpi-sub">${escHtml(c.sub)}</div>
+    </div>
+  `).join('');
+}
+
+/* =============================================
+   RENDER — PÓDIO
+   Ordem visual: 2º | 1º | 3º (clássico pódio)
+============================================= */
+function renderPodium() {
+  const ranked = rankedTeams();
+  const medals  = ['🥈', '🥇', '🥉'];
+  const classes = ['p2nd', 'p1st', 'p3rd'];
+  const labels  = ['2º', '1º', '3º'];
+  const heights = ['100px', '148px', '72px'];
+
+  // Ordem de exibição: índice 1 → índice 0 → índice 2
+  const displayOrder = [ranked[1], ranked[0], ranked[2]];
+
+  document.getElementById('podium').innerHTML = displayOrder.map((team, i) => {
+    if (!team) return '';
+    return `
+      <div class="podium-item ${classes[i]}">
+        <div class="podium-meta">
+          <div class="podium-medal">${medals[i]}</div>
+          <div class="podium-name">${escHtml(team.name)}</div>
+          <div class="podium-val">${formatBRL(team.total)}</div>
+        </div>
+        <div class="podium-block" style="height:${heights[i]}">${labels[i]}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+/* =============================================
+   RENDER — CARDS DAS DUPLAS
+   Inclui inputs editáveis de nome e vendas.
+   IMPORTANTE: onchange dispara ao sair do campo,
+   evitando re-render durante a digitação.
+============================================= */
+function renderTeams() {
+  const ranked  = rankedTeams();
+  const leaderTotal = ranked[0] ? ranked[0].total : 0;
+  const grid    = document.getElementById('teams-grid');
+
+  grid.innerHTML = state.teams.map((team, ti) => {
+    const total    = teamTotal(team);
+    const rankPos  = ranked.findIndex(r => r.id === team.id) + 1; // 1-based
+    const color    = TEAM_HEX[ti];
+    const isLeader = rankPos === 1;
+    const diff     = total - leaderTotal;
+
+    // Texto de diferença para o líder
+    let diffTxt;
+    if (isLeader && total > 0) {
+      diffTxt = '<span class="leader">✦ Equipe na liderança</span>';
+    } else if (total === 0) {
+      diffTxt = 'Aguardando registros';
+    } else if (total === leaderTotal) {
+      diffTxt = '⬤ Empatado com o líder';
+    } else {
+      diffTxt = `${formatBRL(diff)} para o líder`;
+    }
+
+    // Badge de posição
+    const rankEmoji = ['👑', '🥈', '🥉'][rankPos - 1] || '';
+    const rankTxt   = isLeader ? `${rankEmoji} Líder` : `${rankEmoji} ${rankPos}º lugar`;
+    const rankColor = isLeader ? '#f4b942' : 'var(--text-sec)';
+
+    // Linhas dos membros
+    const membersHtml = team.members.map((m, mi) => {
+      const pct = total > 0 ? ((m.sales / total) * 100).toFixed(1) : 0;
+      const salesDisplay = m.sales > 0 ? formatBRL(m.sales) : '';
+      return `
+        <div class="member-row">
+          <div class="member-left">
+            <input
+              class="member-name-inp"
+              type="text"
+              value="${escAttr(m.name)}"
+              placeholder="Nome do participante"
+              onchange="onMemberName(${ti}, ${mi}, this.value)"
+              title="Clique para editar"
+            />
+            <div class="contrib-row">
+              <div class="contrib-track">
+                <div class="contrib-fill" style="width:${pct}%; background:${color}"></div>
+              </div>
+              <span class="contrib-pct">${pct}%</span>
+            </div>
+          </div>
+          <input
+            class="sales-inp"
+            type="text"
+            inputmode="decimal"
+            value="${escAttr(salesDisplay)}"
+            placeholder="R$ 0,00"
+            style="border-color:${m.sales > 0 ? color : ''};"
+            onchange="onSalesChange(${ti}, ${mi}, this.value)"
+            onfocus="this.select()"
+            title="Insira as vendas líquidas (R$)"
+          />
+        </div>
+      `;
+    }).join('');
+
+    return `
+      <div class="team-card r${rankPos}" style="--tc:${color}">
+        <!-- Cabeçalho da dupla -->
+        <div class="team-head" style="background:linear-gradient(135deg, ${color}12, transparent 70%)">
+          <div class="team-name-row">
+            <div class="tc-dot" style="background:${color}"></div>
+            <input
+              class="name-inp"
+              type="text"
+              value="${escAttr(team.name)}"
+              placeholder="Nome da dupla"
+              onchange="onTeamName(${ti}, this.value)"
+              title="Clique para editar o nome da dupla"
+            />
+          </div>
+          <div class="rank-badge" style="color:${rankColor}">${rankTxt}</div>
+        </div>
+
+        <!-- Total da dupla -->
+        <div class="team-totals">
+          <div class="team-tot-label">Total da Dupla</div>
+          <div class="team-tot-val" style="color:${color}">${formatBRL(total)}</div>
+          <div class="team-diff ${isLeader && total > 0 ? 'leader' : ''}">${diffTxt}</div>
+        </div>
+
+        <!-- Membros com inputs -->
+        <div class="members">${membersHtml}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+/* =============================================
+   RENDER — GRÁFICO DE BARRAS
+   Barras proporcionais ao maior total.
+============================================= */
+function renderChart() {
+  const ranked  = rankedTeams();
+  const maxVal  = ranked[0] ? ranked[0].total : 1; // evita divisão por zero
+  const medals  = ['🥇', '🥈', '🥉'];
+  const chartEl = document.getElementById('chart-bars');
+
+  chartEl.innerHTML = ranked.map((team, i) => {
+    const pct   = maxVal > 0 ? Math.max((team.total / maxVal) * 100, 2) : 2;
+    const color = TEAM_HEX[team.colorIdx];
+    return `
+      <div class="bar-row">
+        <div class="bar-label">${medals[i]} ${escHtml(team.name)}</div>
+        <div class="bar-track">
+          <div class="bar-fill" style="width:${pct}%; background:linear-gradient(90deg, ${color}99, ${color})"></div>
+        </div>
+        <div class="bar-val">${formatBRL(team.total)}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+/* =============================================
+   RENDER — ORQUESTRADOR PRINCIPAL
+   Chame esta função após qualquer alteração no state.
+============================================= */
+function render() {
+  renderKPIs();
+  renderPodium();
+  renderTeams();
+  renderChart();
+}
+
+/* =============================================
+   EVENT HANDLERS — Atualização de dados
+============================================= */
+
+/** Atualiza nome de membro */
+function onMemberName(teamIdx, memberIdx, value) {
+  state.teams[teamIdx].members[memberIdx].name =
+    value.trim() || `Participante ${state.teams[teamIdx].members[memberIdx].id}`;
+  saveState();
+  render();
+}
+
+/** Atualiza nome de dupla */
+function onTeamName(teamIdx, value) {
+  state.teams[teamIdx].name = value.trim() || `Dupla ${teamIdx + 1}`;
+  saveState();
+  render();
+}
+
+/** Atualiza valor de vendas de um membro */
+function onSalesChange(teamIdx, memberIdx, rawValue) {
+  state.teams[teamIdx].members[memberIdx].sales = parseBRL(rawValue);
+  saveState();
+  render();
+}
+
+/* =============================================
+   RESET — Zera valores de venda
+============================================= */
+function confirmReset() {
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+}
+
+function handleOverlayClick(e) {
+  if (e.target === e.currentTarget) closeModal();
+}
+
+function doReset() {
+  state.teams.forEach(t => t.members.forEach(m => { m.sales = 0; }));
+  saveState();
+  closeModal();
+  render();
+  showToast('✅ Desafio zerado! Todos os valores foram redefinidos.');
+}
+
+/* =============================================
+   EXPORTAR RESULTADO — copia texto formatado
+============================================= */
+function exportResult() {
+  const ranked = rankedTeams();
+  const total  = grandTotal();
+  const ts     = topSeller();
+  const now    = new Date().toLocaleString('pt-BR', {
+    day: '2-digit', month: '2-digit', year: 'numeric',
+    hour: '2-digit', minute: '2-digit'
+  });
+  const medals = ['🥇', '🥈', '🥉'];
+  const sep    = '─'.repeat(44);
+
+  let txt = `🏆 RESULTADO DO DESAFIO DE VENDAS\n`;
+  txt += `Exportado em: ${now}\n${sep}\n\n`;
+
+  txt += `📊 RANKING DAS DUPLAS\n`;
+  ranked.forEach((team, i) => {
+    const pctGlobal = total > 0
+      ? ((team.total / total) * 100).toFixed(1)
+      : '0.0';
+    txt += `\n${medals[i]} ${team.name}: ${formatBRL(team.total)} (${pctGlobal}% do total)\n`;
+    team.members.forEach(m => {
+      const pct = team.total > 0
+        ? ((m.sales / team.total) * 100).toFixed(1)
+        : '0.0';
+      txt += `   • ${m.name}: ${formatBRL(m.sales)} — ${pct}% da dupla\n`;
+    });
+  });
+
+  txt += `\n${sep}\n`;
+  txt += `💰 Total geral: ${formatBRL(total)}\n`;
+  txt += `📈 Média por dupla: ${formatBRL(total / 3)}\n`;
+
+  if (ts && ts.sales > 0) {
+    txt += `⚡ Melhor vendedor: ${ts.name} · ${formatBRL(ts.sales)}\n`;
+  }
+
+  // Copia para área de transferência
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(txt)
+      .then(()  => showToast('📋 Resultado copiado para a área de transferência!'))
+      .catch(()  => fallbackCopy(txt));
+  } else {
+    fallbackCopy(txt);
+  }
+}
+
+function fallbackCopy(text) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.opacity  = '0';
+  document.body.appendChild(ta);
+  ta.focus();
+  ta.select();
+  try {
+    document.execCommand('copy');
+    showToast('📋 Resultado copiado para a área de transferência!');
+  } catch (_) {
+    showToast('⚠️ Não foi possível copiar automaticamente.');
+  }
+  document.body.removeChild(ta);
+}
+
+/* =============================================
+   TOAST — Notificação temporária
+============================================= */
+let toastTimer = null;
+
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 3500);
+}
+
+/* =============================================
+   UTILITÁRIOS DE SEGURANÇA HTML
+============================================= */
+function escHtml(str) {
+  return String(str ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+function escAttr(str) {
+  return escHtml(str).replace(/"/g, '&quot;');
+}
+
+/* =============================================
+   INICIALIZAÇÃO
+============================================= */
+loadState();   // carrega dados salvos do localStorage
+render();      // renderiza o painel completo
+</script>
+
+</body>
+</html>
